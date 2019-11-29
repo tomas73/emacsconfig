@@ -1,0 +1,243 @@
+(message "Start of .emacs")
+(setq load-path (cons (expand-file-name "~/.config/emacs") load-path))
+(setq inhibit-startup-message t) ;; Do NOT show startup screen
+(tool-bar-mode -1)		 ;; Hide tool-bar
+(show-paren-mode t)		 ;; Show matching paranteses
+(setq line-number-mode 1)	 ;; Show line-number in the mode line
+(setq-default indent-tabs-mode nil) ;; Only indent with SPACE
+(setq c-basic-offset 4)          ;; Indentation
+(setq column-number-mode 1) ;; Show column-number in the mode line
+(setq transient-mark-mode t)	 ;; Show region in inverse video
+(setq next-line-add-newlines nil) ;; No new lines after EOF
+(set-background-color "linen")	  ;; Background color
+(set-face-foreground 'font-lock-comment-face "dodgerblue4")
+(set-face-foreground 'font-lock-warning-face "dodgerblue4")
+(setq revert-without-query t) ;; Dont ask for confirmation to revert buffer
+(add-to-list 'load-path "~/elisp") ;; Read elisp directory
+(setq-default truncate-lines t)    ;; Truncate long lines
+;;(set-default-font "Fixed Regular")    ;; Set Font
+;;(add-to-list 'default-frame-alist '(font . "Fixed Regular" ))
+;;(set-face-attribute 'default t :font "Fixed Regular" )
+;;(set-face-font 'default "-b&h-lucida-medium-r-normal-sans-14-*-*-*-*-*-iso8859-1")
+;;
+;;(load "php-mode")                  ;; Load php-mode
+(require 'cmake-mode)
+
+
+;; Set size and position
+;;(set-frame-height (selected-frame) 55)
+;;(set-frame-width (selected-frame) 166)
+;;(set-frame-position (selected-frame) 50 20)
+
+
+
+(setq auto-mode-alist
+      (append '(("\\.mss$" . scribe-mode))
+	      '(("\\.bib$" . bibtex-mode))
+	      '(("\\.tex$" . latex-mode))
+	      '(("\\.obj$" . lisp-mode))
+	      '(("\\.st$"  . smalltalk-mode))
+	      '(("\\.Z$"   . uncompress-while-visiting))
+	      '(("\\.cs$"  . indented-text-mode))
+	      '(("\\.C$"   . c++-mode))
+	      '(("\\.cc$"  . c++-mode))
+	      '(("\\.icc$" . c++-mode))
+	      '(("\\.c$"   . c-mode))
+	      '(("\\.y$"   . c-mode))
+	      '(("\\.ino$"   . c-mode))
+	      '(("\\.h$"   . c++-mode))
+              '(("\\.s90$" . asm-mode))
+              '(("\\.mac$" . asm-mode))
+              '(("\\.mak$" . makefile-mode))
+	      '(("\\.out$" . compilation-mode))
+	      '(("\\.log$"  . log-view-mode))
+	      '(("\\.bb$"   . python-mode))
+	      '(("\\.bbappend$" . python-mode))
+	      '(("\\.php[34]?\\’\\|\\.phtml\\’" . php-mode))
+	      auto-mode-alist))
+
+
+
+
+(defun t-revert-buffer ()
+  "Reverts the current buffer without asking for confirmation"
+  (interactive)
+  (revert-buffer t t)
+  )
+
+(defun t-make-buffer-neat ()
+  "Removes trailing whitespace and removes tabs"
+  (interactive)
+  (delete-trailing-whitespace)
+  (untabify (point-min) (point-max))
+  (indent-region (point-min) (point-max))
+  )
+
+(defun t-line-up ()
+  "Move screen one line up"
+  (interactive)
+  (scroll-up 1)
+  )
+
+(defun t-line-down ()
+  "Move screen one line up"
+  (interactive)
+  (scroll-down 1)
+  )
+
+
+(defun t-beginning-of-buffer ()
+  "Move point to the beginning of the buffer"
+  (interactive)
+  (goto-char (point-min))
+  )
+
+(defun t-end-of-buffer ()
+  "Move point to the end of the buffer"
+  (interactive)
+  (goto-char (point-max))
+  )
+
+;; Add compiler output pattern(s)
+(require 'compile)
+(global-set-key [f9]      'compile)
+(global-set-key [f1]      'goto-line)
+(global-set-key [f5]      't-revert-buffer)
+(define-key ctl-x-map "g" 'goto-line)
+(define-key ctl-x-map "w" 't-make-buffer-neat)
+(define-key ctl-x-map "c" 'insert-doxygen-param)
+(global-set-key [f10]     't-make-buffer-neat)
+(global-set-key '[M-left]   't-line-up)
+(global-set-key '[M-right] 't-line-down)
+;(global-set-key '[M-a]   't-beginning-of-buffer)
+;(global-set-key '[M-z]   't-end-of-buffer)
+(global-set-key '[M-up]   't-beginning-of-buffer)
+(global-set-key '[M-down]   't-end-of-buffer)
+
+;; IAR C-compiler
+(setq compilation-error-regexp-alist
+      (cons
+       ;; IAR C Compiler: "can.c",390  G
+       '("\"\\(.*\\)\"\,\\([0-9]+\\) +.*$" 1 2)
+       compilation-error-regexp-alist))
+
+
+(defun t-show-trailing-whitespace ()
+  "Makes trailing whitespace visible"
+  (interactive)
+  (setq show-trailing-whitespace t) ;; Show trailing whitespace
+  (set-face-background 'trailing-whitespace "White")
+  (set-face-underline-p 'trailing-whitespace t)
+  )
+
+(defun c-initialization-stuff ()
+  ;; my once per session customizations
+  (message "c-initialization-stuff")
+  (setq truncate-lines t) ;; Do not wrap a line on multiple lines
+  )
+
+
+(add-hook 'c-initialization-hook 'c-initialization-stuff)
+
+(defun c-mode-common-stuff ()
+  ;; my customizations for all of c-mode and related modes
+  (message "c-mode-common-stuff")
+  (t-show-trailing-whitespace)
+  (font-lock-add-keywords
+   'c-mode
+   '(("\\<\\(FIXME\\|TODO\\|TBD\\):" 1 font-lock-warning-face t)))
+  )
+(add-hook 'c-mode-common-hook 'c-mode-common-stuff)
+
+
+(defun c-mode-stuff ()
+  ;; my customizations c-mode
+  (message "c-mode-stuff")
+;;  (c-set-style "ellemtel") ;; Ericsson code style
+  )
+(add-hook 'c-mode-hook 'c-mode-stuff)
+
+
+(defun compilation-mode-stuff ()
+  ;; my customizations c-mode
+  (message "compilation-mode-stuff")
+  (setq truncate-lines t) ;; Do not wrap a line on multiple lines
+  )
+
+(add-hook 'compilation-mode-hook 'compilation-mode-stuff)
+
+
+(defun emacs-lisp-mode-stuff ()
+  ;; my customizations c-mode
+  (message "emacs-lisp-mode-stuff")  (t-show-trailing-whitespace)
+  )
+(add-hook 'emacs-lisp-mode-hook 'emacs-lisp-mode-stuff)
+
+
+
+(defun myTest1 ()
+  "Test func"
+  (interactive)
+  (if (not show-trailing-whitespace)
+      (message "DO NOT SHOW WS")
+    (message "SHOW WS"))
+  (if (not show-paren-mode)
+      (message "DO NOT SHOW PARENTESES")
+    (message "SHOW PARANTESES")))
+
+
+(defun insert-doxygen-type ()
+  "Insert doxygen type comment block."
+  (interactive)
+  (insert "/**\n* enum/struct description\n*/")
+  (backward-char 3))
+
+(defun insert-doxygen-func ()
+  "Insert doxygen function header."
+  (interactive)
+  (insert "/**\n* Function description\n* \param param description\n* \\returns description\n*/")
+  (backward-char 3))
+
+(defun insert-doxygen-param ()
+  "Insert /**<*/ at cursor point."
+  (interactive)
+  (insert "/**<*/")
+  (backward-char 2))
+
+;;(defun myTest2 ()
+;;  "Test func"
+;;  (interactive)
+;;  (if (= show-trailing-whitespace t)
+;;    (message "SHOW WS")))
+
+(myTest1)
+;;(myTest2)
+
+(defun log-mode-stuff ()
+  ;; my customizations for all of c-mode and related modes
+  (message "log-mode-stuff")
+  (font-lock-add-keywords
+   'c-mode
+   '(("\\<\\(PID\\|error\\|TBD\\):" 1 font-lock-warning-face t)))
+  )
+(add-hook 'log-view-mode-hook 'log-mode-stuff)
+
+(defun hilite-todos ()
+  (highlight-lines-matching-regexp "\\<\\([Ff]ail\\|[Ee]rror\\):?"
+       'hi-red-b)
+  (highlight-lines-matching-regexp "==> begin"
+       'hi-green)
+  (highlight-lines-matching-regexp "==> end"
+       'hi-blue)
+  (highlight-lines-matching-regexp "swPackagePath"
+       'hi-yellow)
+  (highlight-lines-matching-regexp "installservice.cpp:352"
+       'hi-green)
+
+)
+
+(add-hook 'log-view-mode-hook 'hilite-todos)
+
+(message "End of .emacs")
+
+(put 'upcase-region 'disabled nil)
