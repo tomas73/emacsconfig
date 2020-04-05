@@ -21,6 +21,11 @@
 ;;(set-face-font 'default "-b&h-lucida-medium-r-normal-sans-14-*-*-*-*-*-iso8859-1")
 ;;
 ;;(load "php-mode")                  ;; Load php-mode
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/"))
+
 (require 'cmake-mode)
 
 
@@ -237,6 +242,7 @@
 )
 
 (add-hook 'log-view-mode-hook 'hilite-todos)
+(add-hook 'sh-mode-hook 'flycheck-mode)
 
 (message "End of .emacs")
 
